@@ -18,7 +18,7 @@ The oracle requires a secure keypair to sign reveal transactions. The `KeyServic
 | `RANDOMNESS_REQUEST_ID`      | Integration tests | Pending randomness request id                           |
 | `RANDOMNESS_SEED`            | No                | Seed value for integration tests                        |
 | `POLL_INTERVAL_MS`           | No                | Event poller interval (default: `5000`)                 |
-| `ORACLE_POLL_INTERVAL_MS`    | No                | Backward-compatible poll interval alias                 |
+| `ORACLE_POLL_INTERVAL_MS`    | No                | Deprecated alias for `POLL_INTERVAL_MS`; accepted with a warning only when `POLL_INTERVAL_MS` is unset |
 | `LOG_LEVEL`                  | No                | Log verbosity (`info` by default)                       |
 | `ORACLE_CHECKPOINT_PATH`     | No                | Ledger checkpoint file for restart recovery             |
 | `ORACLE_ADDRESS`             | Event listener    | This oracle's public key (`G...`)                       |

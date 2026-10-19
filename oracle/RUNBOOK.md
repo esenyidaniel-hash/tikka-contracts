@@ -46,8 +46,8 @@ docker-compose logs -f oracle
 # Check health endpoint (returns {"status":"ok"})
 curl http://localhost:9090/health
 
-# View metrics (Prometheus text format)
-curl http://localhost:9090/metrics
+# View metrics (Prometheus text format; from inside the container)
+docker-compose exec oracle curl http://127.0.0.1:9091/metrics
 ```
 
 ### 4. Local development
@@ -293,7 +293,9 @@ Optional configuration:
 - `DATA_DIR`: Directory for persistent state files (`checkpoint.json` and `dedup.json`). Resolved to an absolute path at startup. In Docker this is the `oracle_data` named volume mounted at `/app/data`. **If this directory is not persisted across restarts the oracle resumes from the current ledger and will miss any `RandomnessRequested` events that arrived while it was down.** (default: `./data`)
 - `LOG_LEVEL`: Logging verbosity (`debug`, `info`, `warn`, `error`; default: `info`)
 - `POLL_INTERVAL_MS`: Event polling interval in milliseconds (default: 5000)
-- `HEALTH_PORT`: Port for `/health` and `/metrics` (default: 9090)
+- `HEALTH_PORT`: Port for `/health` (default: 9090)
+- `METRICS_PORT`: Port for `/metrics` (default: 9091)
+- `ORACLE_POLL_INTERVAL_MS`: Deprecated alias for `POLL_INTERVAL_MS`; using it without `POLL_INTERVAL_MS` emits a warning.
 - `ALERT_WEBHOOK_URL`: Webhook URL for operational alerts
 - `ALERT_FAILURE_THRESHOLD`: Consecutive failures before alerting (default: 3)
 - `ALERT_RATE_LIMIT_MS`: Minimum time between alerts (default: 60000)

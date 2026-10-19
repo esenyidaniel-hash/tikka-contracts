@@ -96,8 +96,12 @@ export function loadAndValidateConfig(): OracleConfig {
   const networkPassphrase = process.env['STELLAR_NETWORK_PASSPHRASE'] ?? Networks.TESTNET;
   const nodeEnv = process.env['NODE_ENV'] ?? 'development';
 
-  const rawPollInterval =
-    process.env['POLL_INTERVAL_MS'] ?? process.env['ORACLE_POLL_INTERVAL_MS'] ?? '5000';
+  const pollInterval = process.env['POLL_INTERVAL_MS'];
+  const deprecatedPollInterval = process.env['ORACLE_POLL_INTERVAL_MS'];
+  if (pollInterval === undefined && deprecatedPollInterval !== undefined) {
+    logger.warn('ORACLE_POLL_INTERVAL_MS is deprecated; use POLL_INTERVAL_MS instead.');
+  }
+  const rawPollInterval = pollInterval ?? deprecatedPollInterval ?? '5000';
   const pollIntervalMs = Number(rawPollInterval);
   if (!Number.isFinite(pollIntervalMs) || pollIntervalMs <= 0) {
     errors.push('POLL_INTERVAL_MS must be a positive number');

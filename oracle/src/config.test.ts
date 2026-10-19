@@ -4,11 +4,12 @@ import { loadAndValidateConfig } from './config';
 jest.mock('./logging/logger', () => ({
   logger: {
     error: jest.fn(),
+    warn: jest.fn(),
   },
 }));
 
 const { logger } = jest.requireMock('./logging/logger') as {
-  logger: { error: jest.Mock };
+  logger: { error: jest.Mock; warn: jest.Mock };
 };
 
 describe('loadAndValidateConfig', () => {
@@ -69,6 +70,35 @@ describe('loadAndValidateConfig', () => {
     expect(config.factoryContractId).toBe(process.env['FACTORY_CONTRACT_ID']);
     expect(config.logLevel).toBe('debug');
     expect(config.pollIntervalMs).toBe(7000);
+  });
+
+  it('supports the deprecated poll interval alias and warns when it is used', () => {
+    process.env['ORACLE_SECRET_KEY'] = Keypair.random().secret();
+    process.env['STELLAR_RPC_URL'] = 'https://soroban-testnet.stellar.org';
+    process.env['FACTORY_CONTRACT_ID'] =
+      'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M';
+    process.env['ORACLE_POLL_INTERVAL_MS'] = '8000';
+
+    const config = loadAndValidateConfig();
+
+    expect(config.pollIntervalMs).toBe(8000);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'ORACLE_POLL_INTERVAL_MS is deprecated; use POLL_INTERVAL_MS instead.'
+    );
+  });
+
+  it('prefers POLL_INTERVAL_MS over the deprecated alias without warning', () => {
+    process.env['ORACLE_SECRET_KEY'] = Keypair.random().secret();
+    process.env['STELLAR_RPC_URL'] = 'https://soroban-testnet.stellar.org';
+    process.env['FACTORY_CONTRACT_ID'] =
+      'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M';
+    process.env['POLL_INTERVAL_MS'] = '7000';
+    process.env['ORACLE_POLL_INTERVAL_MS'] = '8000';
+
+    const config = loadAndValidateConfig();
+
+    expect(config.pollIntervalMs).toBe(7000);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('defaults alert config when ALERT_* variables are unset', () => {
